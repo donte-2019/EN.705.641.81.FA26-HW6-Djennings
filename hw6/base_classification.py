@@ -92,16 +92,19 @@ def evaluate_model(model, dataloader, device):
 
     # iterate over the dataloader
     for batch in dataloader:
-        # TODO: implement the evaluation function
-        # raise NotImplementedError("You need to implement the evaluation function")
+        # implement the evaluation function
         # get the input_ids, attention_mask from the batch and put them on the device
         # Hints:
         # - see the getitem function in the BoolQADataset class for how to access the input_ids and attention_mask
         # - use to() to move the tensors to the device
-
+        input_ids = batch['input_ids'].to(device)
+        attention_mask = batch['attention_mask'].to(device)
 
         # forward pass
         # name the output as `output`
+        # no_grad since evaluation doesn't need gradients
+        with torch.no_grad():
+            output = model(input_ids=input_ids, attention_mask=attention_mask)
 
         # your code ends here
 
@@ -169,27 +172,32 @@ def train(mymodel, num_epochs, train_dataloader, validation_dataloader, test_dat
             Then, call optimizer.zero_grad() to reset the gradients for the next iteration.
             """
 
-            # TODO: implement the training loop
-            # raise NotImplementedError("You need to implement this function")
+            # implement the training loop
 
             # get the input_ids, attention_mask, and labels from the batch and put them on the device
             # Hints: similar to the evaluate_model function
-
+            input_ids = batch['input_ids'].to(device)
+            attention_mask = batch['attention_mask'].to(device)
+            labels = batch['labels'].to(device)
 
             # forward pass
             # name the output as `output`
             # Hints: refer to the evaluate_model function on how to get the predictions (logits)
-
+            output = mymodel(input_ids=input_ids, attention_mask=attention_mask)
+            predictions = output.logits
 
             # compute the loss using the loss function
-
+            model_loss = loss(predictions, labels)
 
             # loss backward
-
+            model_loss.backward()
 
             # update the model parameters with optimizer and lr_scheduler step
+            optimizer.step()
+            lr_scheduler.step()
 
             # zero the gradients
+            optimizer.zero_grad()
 
             # your code ends here
 
